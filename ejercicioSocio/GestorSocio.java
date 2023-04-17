@@ -3,6 +3,10 @@ package ejercicioSocio;
 import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Scanner;
 
 public class GestorSocio {
@@ -35,11 +39,13 @@ public class GestorSocio {
                 modificacion();
                 break;
                 case 4:
-
+                listadoPorDNI();
+                break;
                 case 5:
-
+                listadoPorAntiguedad();
                 case 6:
-
+                guardarFichero();
+                break;
                 default:
                 System.out.println("La opcion introducida no se encuentra disponible");
             }
@@ -66,7 +72,51 @@ public class GestorSocio {
 
     private static void modificacion(){
         Scanner sc = new Scanner(System.in);
-        System.out.println("");
+        System.out.println("Introduce el DNI del socio para modificar:");
+        String dni = sc.next();
+        Socio socio = new Socio(dni, "",LocalDate.now());
+        int indice = socios.indexOf(socio);
+        System.out.println("Introduce el nuevo nombre: ");
+        String nombre = sc.next();
+        socios.get(indice).nombre = nombre;
+        System.out.println("Se modifico correctamente.");
     }
 
+    private static void listadoPorDNI() {
+        System.out.println("Listado de socios ordenados por DNI:");
+        for (Socio socio : socios) {
+            System.out.println(socio.toString());
+        }
+    }
+
+    private static void listadoPorAntiguedad() {
+        Comparator<Socio> comparador = new Comparator<Socio>() {
+            @Override
+            public int compare(Socio s1, Socio s2) {
+                return s1.antiguedad() - s2.antiguedad();
+            }
+        };
+        Collections.sort(socios, comparador);
+        System.out.println("Listado de socios ordenados por antigüedad:");
+        for (Socio socio : socios) {
+            System.out.println(socio.toString());
+        }
+    }
+
+    private static void leerFichero() {
+        File fichero_socio = new File(fichero);
+            try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(fichero))) {
+                socios = (ArrayList<Socio>) in.readObject();
+            } catch (IOException | ClassNotFoundException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+    private static void guardarFichero() {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fichero))) {
+            out.writeObject(socios);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
 }
